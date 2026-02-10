@@ -50,6 +50,8 @@
       </div>
     </div>
 
+    {{-- TEST KOMEN --}}
+
     <nav class="menu">
       <div class="menu-block">
         <div class="menu-label">MAIN</div>
