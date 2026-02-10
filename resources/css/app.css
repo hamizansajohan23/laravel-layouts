@@ -1,0 +1,25 @@
+/* Light blue accent + softer look */
+:root{
+  --brand-blue: #3b82f6;
+  --brand-blue-soft: rgba(59,130,246,.12);
+}
+
+/* Sidebar / menu active styles */
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active,
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active:hover {
+  background-color: var(--brand-blue-soft) !important;
+  color: #0f172a !important;
+}
+
+/* Make the active icon a bit more blue */
+.nav-sidebar .nav-link.active .nav-icon {
+  color: var(--brand-blue) !important;
+}
+
+/* Optional: round corners a little */
+.nav-sidebar .nav-link {
+  border-radius: 10px;
+}
+.content-wrapper{
+  background: #fff;
+}
