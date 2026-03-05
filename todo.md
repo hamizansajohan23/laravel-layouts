@@ -1,57 +1,53 @@
-Nama sistem: Sistem Pengurusan Latihan Kompetensi KKDW
+Nama sistem : Sistem Permohonan Pengguna Baru
 
-Flow utama sistem:
+Tujuan :
+mendaftarkan pengguna-pengguna baru
 
-Peranan pengguna
-1. Pentadbir PSM
-2. Pentadbir Latihan Bahagian
-3. Superadmin
+Peranan :
+-admin
+-pengguna
 
+Modul :
+-Login
+-Lupa kata laluan
+-Profil Pengguna
+-Tukar Kata Laluan
+-Permohonan Pengguna
+-Senarai Pengguna
 
-Pengguna perlu login terduhulu untuk guna sistem
+Pangkalan data
+nama_pangkalan data : laravel
 
+Login
+-id_pengguna (PK)
+-kata_laluan
 
+Lupa kata laluan
+-emel
 
-1. Page: Senarai semua permohonan
-    i. 
+Profil Pengguna
+-nama_pengguna
+-nokp_pengguna
+-emel_pengguna
+-bahagian
 
-    
-Flow utama
-1. Pentadbir PSM daftarkan tahun untuk membenarkan Pentabdir Latihan Bahagian mohon latihan yang dinginkan. Maklumat yang di isi semasa daftarkan tahun adalah seperti berikut:
-    - Tahun
-    - Tarikh buka
-    - Tarikh tutup
+Tukar kata laluan
+-password
+-password_baru
+-pengguna_id (FK)
 
-Maklumat page: Senarai latihan yang dimohon. Ada dropdown tahun
+Permohonan ID Pengguna Baru
+-nama_pengguna
+-no_kp
+-emel
+-bahagian
+-pengguna_id (FK)
+-status - untuk admin menerima atau menolak permohonan pengguna
 
-2. Pentabdir Latihan Bahagian akan membuat permohonan dengan memasukkan senarai latihan yang dinginkan. Senarai latihan boleh disimpan dulu. Setelah klik hantar barulah akan dihantar kepada Pentadbir PSM. Maklumat yang dimasukkan adalah seperti berikut:
-    - Tajuk Kursus/Latihan
-    - Kumpulan sasar
-    - Jenis kursus
-    - Kaedah pelaksanaan
-    - Tempat
-    - Tempoh
-    - Bilangan penyertaan (orang)
-    - Anggaran kos
-    - Urusetia
-    - Sumber peruntukan (OS29 ICT, OS29 PSM)
-    - Catatan
-3. Pentadbir PSM dapat lihat senarai latihan yang dipohon.
-    - 
-4. Pentadbir PSM boleh kemaskini semua maklumat latihan yang dipohon. Status permohonan boleh dikemaskini. Setelah kemaskini dan simpan, emel notifikasi akan dihantar kepada pemohon untum memaklumkan status permohonan yang dihantar.
-5. Pentadbir Latihan Bahagian boleh lihat senarai latihan yang diluluskan. Senarai yang tidak lulus juga boleh dilihat
-
-
-Senarai yang ada
-1. Senarai latihan yang diluluskan
-    - Bahagian
-    - Status permohonan    
-    - Sumber peruntukan
-    - Status pelaksanaan
-    -  
-2. Senarai semua permohonan latihan oleh Bahagian
-    - Bahagian
-    - Status permohonan
-    - Jenis kursus
-    - Sumber peruntukan 
-3. 
+Senarai ID Pengguna
+-nama_pengguna
+-no_kp
+-emel
+-bahagian
+-status enum=('aktif,tidak aktif')
+-pengguna_id (FK)

@@ -15,11 +15,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Seed bahagian dahulu
+        $this->call(BahagianSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Cipta Admin (BHG ICT - id 32)
+        User::factory()->admin()->create([
+            'name' => 'Admin',
+            'email' => 'admin@test.com',
+            'bahagian_id' => 32,
         ]);
+
+        // Cipta Pengguna Biasa (BHG PSM - id 29)
+        User::factory()->create([
+            'name' => 'Pengguna',
+            'email' => 'pengguna@test.com',
+            'bahagian_id' => 29,
+        ]);
+
+        // Pengguna dummy tambahan (optional)
+        // User::factory(5)->create();
     }
 }
