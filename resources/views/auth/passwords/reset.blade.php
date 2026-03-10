@@ -107,6 +107,88 @@
       display: block;
     }
 
+    .password-input-wrapper {
+      position: relative;
+    }
+
+    .password-input-wrapper .form-input {
+      padding-right: 48px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      padding: 4px;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+
+    .password-toggle:hover {
+      color: #374151;
+    }
+
+    .password-tips {
+      margin-top: 16px;
+      padding: 16px;
+      background: #f3f4f6;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .password-tips-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 12px;
+    }
+
+    .password-tips-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .password-tips-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+      transition: all 0.2s ease;
+    }
+
+    .password-tips-item i {
+      color: #9ca3af;
+      font-size: 8px;
+      transition: all 0.2s ease;
+      width: 14px;
+      text-align: center;
+    }
+
+    .password-tips-item.valid i {
+      color: #10b981;
+      font-size: 14px;
+    }
+
+    .password-tips-item.valid span {
+      color: #10b981;
+    }
+
+    .password-tips-item.invalid i {
+      color: #ef4444;
+      font-size: 14px;
+    }
+
+    .password-tips-item.invalid span {
+      color: #ef4444;
+    }
+
     .btn-login {
       width: 100%;
       padding: 12px;
@@ -205,29 +287,65 @@
 
         <div class="form-group">
           <label for="password" class="form-label">Kata Laluan Baru</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            class="form-input @error('password') is-invalid @enderror"
-            placeholder="••••••••"
-            required
-          >
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input @error('password') is-invalid @enderror"
+              placeholder="••••••••"
+              required
+            >
+            <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
           @error('password')
             <span class="invalid-feedback">{{ $message }}</span>
           @enderror
+
+          <div class="password-tips">
+            <div class="password-tips-title">Keperluan Kata Laluan</div>
+            <div class="password-tips-list">
+              <div class="password-tips-item" id="tip-length">
+                <i class="fa-solid fa-circle"></i>
+                <span>Sekurang-kurangnya 12 aksara</span>
+              </div>
+              <div class="password-tips-item" id="tip-lowercase">
+                <i class="fa-solid fa-circle"></i>
+                <span>Satu huruf kecil (a-z)</span>
+              </div>
+              <div class="password-tips-item" id="tip-uppercase">
+                <i class="fa-solid fa-circle"></i>
+                <span>Satu huruf besar (A-Z)</span>
+              </div>
+              <div class="password-tips-item" id="tip-number">
+                <i class="fa-solid fa-circle"></i>
+                <span>Satu nombor (0-9)</span>
+              </div>
+              <div class="password-tips-item" id="tip-special">
+                <i class="fa-solid fa-circle"></i>
+                <span>Satu aksara khas (@$!%*?&)</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
           <label for="password_confirmation" class="form-label">Sahkan Kata Laluan</label>
-          <input
-            type="password"
-            id="password_confirmation"
-            name="password_confirmation"
-            class="form-input"
-            placeholder="••••••••"
-            required
-          >
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              id="password_confirmation"
+              name="password_confirmation"
+              class="form-input"
+              placeholder="••••••••"
+              required
+            >
+            <button type="button" class="password-toggle" onclick="togglePassword('password_confirmation', this)">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
         </div>
 
         <button type="submit" class="btn-login">
@@ -240,5 +358,60 @@
       </div>
     </div>
   </div>
+
+  <script>
+    function togglePassword(inputId, button) {
+      const input = document.getElementById(inputId);
+      const icon = button.querySelector('i');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // Real-time password validation
+    document.addEventListener('DOMContentLoaded', function() {
+      const passwordInput = document.getElementById('password');
+
+      const rules = [
+        { id: 'tip-length', test: (pwd) => pwd.length >= 12 },
+        { id: 'tip-lowercase', test: (pwd) => /[a-z]/.test(pwd) },
+        { id: 'tip-uppercase', test: (pwd) => /[A-Z]/.test(pwd) },
+        { id: 'tip-number', test: (pwd) => /[0-9]/.test(pwd) },
+        { id: 'tip-special', test: (pwd) => /[@$!%*?&]/.test(pwd) }
+      ];
+
+      function validatePassword() {
+        const password = passwordInput.value;
+
+        rules.forEach(rule => {
+          const element = document.getElementById(rule.id);
+          const icon = element.querySelector('i');
+
+          if (password.length === 0) {
+            element.classList.remove('valid', 'invalid');
+            icon.className = 'fa-solid fa-circle';
+          } else if (rule.test(password)) {
+            element.classList.remove('invalid');
+            element.classList.add('valid');
+            icon.className = 'fa-solid fa-check';
+          } else {
+            element.classList.remove('valid');
+            element.classList.add('invalid');
+            icon.className = 'fa-solid fa-xmark';
+          }
+        });
+      }
+
+      passwordInput.addEventListener('input', validatePassword);
+      passwordInput.addEventListener('focus', validatePassword);
+    });
+  </script>
 </body>
 </html>

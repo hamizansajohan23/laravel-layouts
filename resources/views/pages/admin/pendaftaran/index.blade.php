@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Senarai Pengguna')
-@section('header_title', 'Senarai Pengguna')
-@section('header_subtitle', 'Pengurusan pengguna sistem')
+@section('title', 'Senarai Permohonan')
+@section('header_title', 'Senarai Permohonan')
+@section('header_subtitle', 'Urus permohonan pendaftaran pengguna baru')
 
 @push('styles')
 <style>
-  .pengguna-page {
+  .pendaftaran-page {
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -19,13 +19,6 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .page-header-info {
-    flex: 1;
-    min-width: 0;
   }
 
   .page-header-info h2 {
@@ -41,51 +34,11 @@
     margin: 0;
   }
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    border: none;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(59, 87, 244, 0.3);
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 87, 244, 0.4);
-  }
-
   /* Stats Cards */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-  }
-
-  @media (max-width: 1200px) {
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 600px) {
-    .stats-grid {
-      grid-template-columns: 1fr;
-    }
   }
 
   .stat-card {
@@ -112,24 +65,8 @@
     border-radius: 4px 0 0 4px;
   }
 
-  .stat-card.primary::before {
-    background: linear-gradient(180deg, var(--accent), var(--accent-2));
-  }
-
-  .stat-card.info::before {
-    background: linear-gradient(180deg, #3b82f6, #2563eb);
-  }
-
-  .stat-card.success::before {
-    background: linear-gradient(180deg, #27c2a4, #10b981);
-  }
-
   .stat-card.warning::before {
     background: linear-gradient(180deg, #fbbf24, #f59e0b);
-  }
-
-  .stat-card.danger::before {
-    background: linear-gradient(180deg, #ef4444, #dc2626);
   }
 
   .stat-card:hover {
@@ -148,29 +85,9 @@
     flex-shrink: 0;
   }
 
-  .stat-icon.primary {
-    background: linear-gradient(135deg, rgba(59, 87, 244, 0.15), rgba(39, 194, 164, 0.1));
-    color: var(--accent);
-  }
-
-  .stat-icon.info {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
-    color: #3b82f6;
-  }
-
-  .stat-icon.success {
-    background: linear-gradient(135deg, rgba(39, 194, 164, 0.15), rgba(16, 185, 129, 0.1));
-    color: #27c2a4;
-  }
-
   .stat-icon.warning {
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
     color: #f59e0b;
-  }
-
-  .stat-icon.danger {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
-    color: #ef4444;
   }
 
   .stat-info {
@@ -237,25 +154,6 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(59, 87, 244, 0.1);
     background: var(--panel);
-  }
-
-  .filter-select {
-    min-width: 150px;
-    padding: 12px 16px;
-    font-size: 14px;
-    font-family: inherit;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg);
-    color: var(--ink);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .filter-select:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(59, 87, 244, 0.1);
   }
 
   /* Table Card */
@@ -380,107 +278,6 @@
     color: var(--muted);
   }
 
-  /* Badges */
-  .role-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: capitalize;
-  }
-
-  .role-badge.admin {
-    background: linear-gradient(135deg, rgba(59, 87, 244, 0.15), rgba(59, 87, 244, 0.05));
-    color: var(--accent);
-    border: 1px solid rgba(59, 87, 244, 0.2);
-  }
-
-  .role-badge.admin::before {
-    content: '\f521';
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    font-size: 10px;
-  }
-
-  .role-badge.pengguna {
-    background: linear-gradient(135deg, rgba(39, 194, 164, 0.15), rgba(39, 194, 164, 0.05));
-    color: #27c2a4;
-    border: 1px solid rgba(39, 194, 164, 0.2);
-  }
-
-  .role-badge.pengguna::before {
-    content: '\f007';
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    font-size: 10px;
-  }
-
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .status-badge.success {
-    background: linear-gradient(135deg, rgba(39, 194, 164, 0.15), rgba(39, 194, 164, 0.05));
-    color: #10b981;
-    border: 1px solid rgba(39, 194, 164, 0.2);
-  }
-
-  .status-badge.danger {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-  }
-
-  .status-badge.warning {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05));
-    color: #f59e0b;
-    border: 1px solid rgba(251, 191, 36, 0.2);
-  }
-
-  .status-badge.info {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
-    color: #3b82f6;
-    border: 1px solid rgba(59, 130, 246, 0.2);
-  }
-
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  .status-badge.success .status-dot {
-    background: #10b981;
-  }
-
-  .status-badge.danger .status-dot {
-    background: #ef4444;
-    animation: none;
-  }
-
-  .status-badge.warning .status-dot {
-    background: #f59e0b;
-  }
-
-  .status-badge.info .status-dot {
-    background: #3b82f6;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-
   /* Bahagian Column */
   .bahagian-text {
     display: inline-flex;
@@ -519,32 +316,6 @@
     font-size: 14px;
   }
 
-  .btn-action.edit {
-    background: linear-gradient(135deg, rgba(59, 87, 244, 0.1), rgba(59, 87, 244, 0.05));
-    color: var(--accent);
-    border: 1px solid rgba(59, 87, 244, 0.15);
-  }
-
-  .btn-action.edit:hover {
-    background: var(--accent);
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 87, 244, 0.3);
-  }
-
-  .btn-action.delete {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.15);
-  }
-
-  .btn-action.delete:hover {
-    background: #ef4444;
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-  }
-
   .btn-action.approve {
     background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
     color: #22c55e;
@@ -559,16 +330,16 @@
   }
 
   .btn-action.reject {
-    background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(249, 115, 22, 0.05));
-    color: #f97316;
-    border: 1px solid rgba(249, 115, 22, 0.15);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.15);
   }
 
   .btn-action.reject:hover {
-    background: #f97316;
+    background: #ef4444;
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   }
 
   /* Empty State */
@@ -601,7 +372,7 @@
   .empty-state p {
     font-size: 14px;
     color: var(--muted);
-    margin: 0 0 24px;
+    margin: 0;
   }
 
   /* Pagination */
@@ -678,10 +449,6 @@
       width: 100%;
     }
 
-    .filter-select {
-      width: 100%;
-    }
-
     .data-table th,
     .data-table td {
       padding: 12px 14px;
@@ -691,7 +458,7 @@
 @endpush
 
 @section('content')
-<div class="pengguna-page">
+<div class="pendaftaran-page">
   @if (session('success'))
     <div class="alert alert-success">
       <i class="fa-solid fa-circle-check"></i>
@@ -708,50 +475,19 @@
 
   <div class="page-header">
     <div class="page-header-info">
-      <h2>Pengurusan Pengguna</h2>
-      <p>Urus semua pengguna dalam sistem</p>
+      <h2>Senarai Permohonan</h2>
+      <p>Urus permohonan pendaftaran pengguna baru yang memerlukan kelulusan</p>
     </div>
-    <a href="{{ route('admin.pengguna.create') }}" class="btn btn-primary">
-      <i class="fa-solid fa-user-plus"></i>
-      Cipta Pengguna Baru
-    </a>
   </div>
 
   <div class="stats-grid">
-    <div class="stat-card primary">
-      <div class="stat-icon primary">
-        <i class="fa-solid fa-users"></i>
+    <div class="stat-card warning">
+      <div class="stat-icon warning">
+        <i class="fa-solid fa-user-clock"></i>
       </div>
       <div class="stat-info">
-        <h4>{{ $users->total() }}</h4>
-        <p>Jumlah Pengguna</p>
-      </div>
-    </div>
-    <div class="stat-card info">
-      <div class="stat-icon info">
-        <i class="fa-solid fa-user-plus"></i>
-      </div>
-      <div class="stat-info">
-        <h4>{{ App\Models\User::where('status', 'baru')->whereNotNull('email_verified_at')->count() }}</h4>
-        <p>Baru</p>
-      </div>
-    </div>
-    <div class="stat-card success">
-      <div class="stat-icon success">
-        <i class="fa-solid fa-user-check"></i>
-      </div>
-      <div class="stat-info">
-        <h4>{{ App\Models\User::where('status', 'aktif')->count() }}</h4>
-        <p>Aktif</p>
-      </div>
-    </div>
-    <div class="stat-card danger">
-      <div class="stat-icon danger">
-        <i class="fa-solid fa-user-xmark"></i>
-      </div>
-      <div class="stat-info">
-        <h4>{{ App\Models\User::where('status', 'tidak_aktif')->count() }}</h4>
-        <p>Tidak Aktif</p>
+        <h4>{{ $pendaftarans->total() }}</h4>
+        <p>Menunggu Kelulusan</p>
       </div>
     </div>
   </div>
@@ -759,56 +495,37 @@
   <div class="toolbar">
     <div class="search-box">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="searchInput" placeholder="Cari nama, emel atau No. KP..." onkeyup="filterTable()">
+      <input type="text" id="searchInput" placeholder="Cari nama atau emel pemohon..." onkeyup="filterTable()">
     </div>
-    <select class="filter-select" id="bahagianFilter" onchange="filterTable()">
-      <option value="">Semua Bahagian</option>
-      @foreach ($bahagians as $bahagian)
-        <option value="{{ $bahagian->id }}">{{ $bahagian->nama_pendek }}</option>
-      @endforeach
-    </select>
-    <select class="filter-select" id="roleFilter" onchange="filterTable()">
-      <option value="">Semua Peranan</option>
-      <option value="admin">Pentadbir</option>
-      <option value="pengguna">Pengguna</option>
-    </select>
-    <select class="filter-select" id="statusFilter" onchange="filterTable()">
-      <option value="">Semua Status</option>
-      <option value="baru">Baru</option>
-      <option value="aktif">Aktif</option>
-      <option value="tidak_aktif">Tidak Aktif</option>
-    </select>
   </div>
 
   <div class="table-card">
     <div class="table-card-header">
       <h3>
         <i class="fa-solid fa-list"></i>
-        Senarai Pengguna
+        Senarai Permohonan Pendaftaran
       </h3>
-      <span class="count-badge">{{ $users->total() }} pengguna</span>
+      <span class="count-badge">{{ $pendaftarans->total() }} permohonan</span>
     </div>
 
-    @if ($users->count() > 0)
+    @if ($pendaftarans->count() > 0)
       <div class="table-responsive">
-        <table class="data-table" id="userTable">
+        <table class="data-table" id="pendaftaranTable">
           <thead>
             <tr>
               <th style="width: 60px;">Bil</th>
-              <th>Pengguna</th>
+              <th>Pemohon</th>
               <th>No. KP</th>
               <th>Bahagian</th>
-              <th>Peranan</th>
-              <th>Status</th>
-              <th>Tarikh Daftar</th>
+              <th>Tarikh Mohon</th>
               <th style="text-align: center; width: 120px;">Tindakan</th>
             </tr>
           </thead>
           <tbody>
-            @foreach ($users as $index => $user)
-              <tr data-name="{{ strtolower($user->name) }}" data-email="{{ strtolower($user->email) }}" data-nokp="{{ strtolower($user->nokp ?? '') }}" data-role="{{ strtolower($user->role) }}" data-status="{{ $user->status }}" data-bahagian="{{ $user->bahagian_id ?? '' }}">
+            @foreach ($pendaftarans as $index => $user)
+              <tr data-name="{{ strtolower($user->name) }}" data-email="{{ strtolower($user->email) }}">
                 <td>
-                  <strong>{{ $users->firstItem() + $index }}</strong>
+                  <strong>{{ $pendaftarans->firstItem() + $index }}</strong>
                 </td>
                 <td>
                   <div class="user-info">
@@ -839,17 +556,6 @@
                   @endif
                 </td>
                 <td>
-                  <span class="role-badge {{ strtolower($user->role) }}">
-                    {{ ucfirst($user->role) }}
-                  </span>
-                </td>
-                <td>
-                  <span class="status-badge {{ $user->status_color }}">
-                    <span class="status-dot"></span>
-                    {{ $user->status_label }}
-                  </span>
-                </td>
-                <td>
                   <div class="date-text">
                     {{ $user->created_at->format('d M Y') }}
                     <span class="time">{{ $user->created_at->format('h:i A') }}</span>
@@ -857,18 +563,20 @@
                 </td>
                 <td style="text-align: center;">
                   <div class="action-buttons">
-                    <a href="{{ route('admin.pengguna.edit', $user) }}" class="btn-action edit" title="Kemaskini">
-                      <i class="fa-solid fa-pen-to-square"></i>
-                    </a>
-                    @if ($user->id !== auth()->id())
-                      <form action="{{ route('admin.pengguna.destroy', $user) }}" method="POST" style="display: inline;" onsubmit="return confirm('Adakah anda pasti mahu memadam pengguna {{ $user->name }}?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn-action delete" title="Padam">
-                          <i class="fa-solid fa-trash"></i>
-                        </button>
-                      </form>
-                    @endif
+                    <form action="{{ route('admin.pendaftaran.approve', $user) }}" method="POST" style="display: inline;" onsubmit="return confirm('Luluskan pendaftaran {{ $user->name }}?');">
+                      @csrf
+                      @method('PATCH')
+                      <button type="submit" class="btn-action approve" title="Luluskan">
+                        <i class="fa-solid fa-check"></i>
+                      </button>
+                    </form>
+                    <form action="{{ route('admin.pendaftaran.reject', $user) }}" method="POST" style="display: inline;" onsubmit="return confirm('Tolak dan padam pendaftaran {{ $user->name }}?');">
+                      @csrf
+                      @method('PATCH')
+                      <button type="submit" class="btn-action reject" title="Tolak">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                    </form>
                   </div>
                 </td>
               </tr>
@@ -876,22 +584,18 @@
           </tbody>
         </table>
       </div>
-      @if ($users->hasPages())
+      @if ($pendaftarans->hasPages())
         <div class="pagination-wrapper">
-          {{ $users->links() }}
+          {{ $pendaftarans->links() }}
         </div>
       @endif
     @else
       <div class="empty-state">
         <div class="empty-state-icon">
-          <i class="fa-solid fa-users"></i>
+          <i class="fa-solid fa-inbox"></i>
         </div>
-        <h4>Tiada Pengguna</h4>
-        <p>Belum ada pengguna dalam sistem. Cipta pengguna pertama anda.</p>
-        <a href="{{ route('admin.pengguna.create') }}" class="btn btn-primary">
-          <i class="fa-solid fa-user-plus"></i>
-          Cipta Pengguna
-        </a>
+        <h4>Tiada Permohonan</h4>
+        <p>Tiada permohonan pendaftaran yang memerlukan kelulusan buat masa ini.</p>
       </div>
     @endif
   </div>
@@ -902,25 +606,15 @@
 <script>
 function filterTable() {
   const searchValue = document.getElementById('searchInput').value.toLowerCase();
-  const bahagianFilter = document.getElementById('bahagianFilter').value;
-  const roleFilter = document.getElementById('roleFilter').value.toLowerCase();
-  const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-  const rows = document.querySelectorAll('#userTable tbody tr');
+  const rows = document.querySelectorAll('#pendaftaranTable tbody tr');
 
   rows.forEach(row => {
     const name = row.dataset.name || '';
     const email = row.dataset.email || '';
-    const nokp = row.dataset.nokp || '';
-    const bahagian = row.dataset.bahagian || '';
-    const role = row.dataset.role || '';
-    const status = row.dataset.status || '';
 
-    const matchSearch = name.includes(searchValue) || email.includes(searchValue) || nokp.includes(searchValue);
-    const matchBahagian = !bahagianFilter || bahagian === bahagianFilter;
-    const matchRole = !roleFilter || role === roleFilter;
-    const matchStatus = !statusFilter || status === statusFilter;
+    const matchSearch = name.includes(searchValue) || email.includes(searchValue);
 
-    if (matchSearch && matchBahagian && matchRole && matchStatus) {
+    if (matchSearch) {
       row.style.display = '';
     } else {
       row.style.display = 'none';

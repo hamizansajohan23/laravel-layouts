@@ -3,15 +3,20 @@
 use App\Http\Controllers\Auth\ChangePasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 // Auth Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
+
+    // Registration Routes
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [RegisterController::class, 'register']);
 
     // Password Reset Routes
     Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
@@ -24,34 +29,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 
 // Protected Routes
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        $user = auth()->user();
-        $isAdmin = strtolower($user->role) === 'admin';
-
-        // Statistik untuk dashboard (admin sahaja)
-        $stats = [];
-        $chartData = [];
-        $permohonanTerkini = collect();
-
-        if ($isAdmin) {
-            $stats = [
-                'jumlah_pengguna' => User::count(),
-                'pengguna_aktif' => User::where('status', 'aktif')->count(),
-                'pengguna_tidak_aktif' => User::where('status', 'tidak_aktif')->count(),
-            ];
-
-            // Data untuk graf bulanan (6 bulan terakhir)
-            for ($i = 5; $i >= 0; $i--) {
-                $date = now()->subMonths($i);
-                $chartData['labels'][] = $date->translatedFormat('M');
-                $chartData['pengguna'][] = User::whereYear('created_at', $date->year)
-                    ->whereMonth('created_at', $date->month)
-                    ->count();
-            }
-        }
-
-        return view('pages.dashboard', compact('stats', 'chartData', 'isAdmin'));
-    })->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profil Pengguna
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -63,6 +41,11 @@ Route::middleware('auth')->group(function () {
 
     // Admin Routes
     Route::prefix('admin')->name('admin.')->group(function () {
+        // Senarai Permohonan Pendaftaran
+        Route::get('/pendaftaran', [App\Http\Controllers\Admin\PendaftaranController::class, 'index'])->name('pendaftaran.index');
+        Route::patch('/pendaftaran/{user}/approve', [App\Http\Controllers\Admin\PendaftaranController::class, 'approve'])->name('pendaftaran.approve');
+        Route::patch('/pendaftaran/{user}/reject', [App\Http\Controllers\Admin\PendaftaranController::class, 'reject'])->name('pendaftaran.reject');
+
         // Senarai Pengguna (untuk admin)
         Route::get('/pengguna', [App\Http\Controllers\Admin\PenggunaController::class, 'index'])->name('pengguna.index');
         Route::get('/pengguna/create', [App\Http\Controllers\Admin\PenggunaController::class, 'create'])->name('pengguna.create');

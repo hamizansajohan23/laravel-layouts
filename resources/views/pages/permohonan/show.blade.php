@@ -207,7 +207,7 @@
   }
 
   .btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
     border: none;
     color: #fff;
   }

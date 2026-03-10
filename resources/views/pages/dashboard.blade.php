@@ -232,7 +232,7 @@
   }
 
   .welcome-banner {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
     border-radius: var(--radius);
     padding: 24px 28px;
     color: #fff;
@@ -306,6 +306,15 @@
         <div class="stat-info">
           <h4>{{ $stats['pengguna_tidak_aktif'] }}</h4>
           <p>Pengguna Tidak Aktif</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon warning">
+          <i class="fa-solid fa-user-clock"></i>
+        </div>
+        <div class="stat-info">
+          <h4>{{ $stats['permohonan_baru'] }}</h4>
+          <p>Permohonan Pendaftaran</p>
         </div>
       </div>
     </div>

@@ -26,13 +26,33 @@ class LoginController extends Controller
         $credentials = $request->validated();
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::user();
+
+            // Semak jika pengguna masih menunggu kelulusan (baru + belum diluluskan)
+            if ($user->isPendingApproval()) {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'nokp' => 'Akaun anda masih menunggu kelulusan admin.',
+                ]);
+            }
+
+            if ($user->status === 'tidak_aktif') {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'nokp' => 'Akaun anda telah dinyahaktifkan. Sila hubungi admin.',
+                ]);
+            }
+
             $request->session()->regenerate();
 
-            return redirect()->intended(route('dashboard'));
+            // Clear intended URL and always redirect to dashboard
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('dashboard');
         }
 
         throw ValidationException::withMessages([
-            'email' => __('The provided credentials do not match our records.'),
+            'nokp' => 'No. Kad Pengenalan atau kata laluan tidak sah.',
         ]);
     }
 

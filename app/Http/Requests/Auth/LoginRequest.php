@@ -22,7 +22,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
+            'nokp' => ['required', 'string', 'size:12'],
             'password' => ['required', 'string'],
         ];
     }
@@ -35,8 +35,8 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Emel wajib diisi.',
-            'email.email' => 'Format emel tidak sah.',
+            'nokp.required' => 'No. Kad Pengenalan wajib diisi.',
+            'nokp.size' => 'No. Kad Pengenalan mestilah 12 digit.',
             'password.required' => 'Kata laluan wajib diisi.',
         ];
     }

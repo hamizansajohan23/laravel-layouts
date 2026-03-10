@@ -154,13 +154,15 @@
       position: relative;
     }
 
-    .input-wrapper i {
+    .input-wrapper > i {
       position: absolute;
       left: 14px;
       top: 50%;
       transform: translateY(-50%);
       color: #9ca3af;
       font-size: 16px;
+      z-index: 1;
+      pointer-events: none;
     }
 
     .form-input {
@@ -172,6 +174,10 @@
       border-radius: 10px;
       transition: all 0.2s;
       background: #f9fafb;
+    }
+
+    .input-wrapper .form-input.password-field {
+      padding-right: 48px;
     }
 
     .form-input:focus {
@@ -197,6 +203,24 @@
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      padding: 4px;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+
+    .password-toggle:hover {
+      color: #374151;
     }
 
     .form-options {
@@ -291,8 +315,18 @@
       margin-top: 32px;
       padding-top: 24px;
       border-top: 1px solid #e5e7eb;
-      font-size: 13px;
-      color: #9ca3af;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .login-footer a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .login-footer a:hover {
+      text-decoration: underline;
     }
 
     /* Responsive */
@@ -360,6 +394,13 @@
           </div>
         @endif
 
+        @if (session('success'))
+          <div class="alert alert-success">
+            <i class="fa-solid fa-circle-check"></i>
+            {{ session('success') }}
+          </div>
+        @endif
+
         @if ($errors->any())
           <div class="alert alert-danger">
             <i class="fa-solid fa-circle-exclamation"></i>
@@ -371,21 +412,23 @@
           @csrf
 
           <div class="form-group">
-            <label for="email" class="form-label">Alamat Emel</label>
+            <label for="nokp" class="form-label">No. Kad Pengenalan</label>
             <div class="input-wrapper">
-              <i class="fa-solid fa-envelope"></i>
+              <i class="fa-solid fa-id-card"></i>
               <input
-                type="email"
-                id="email"
-                name="email"
-                class="form-input @error('email') is-invalid @enderror"
-                value="{{ old('email') }}"
-                placeholder="nama@kkdw.gov.my"
+                type="text"
+                id="nokp"
+                name="nokp"
+                class="form-input @error('nokp') is-invalid @enderror"
+                value="{{ old('nokp') }}"
+                placeholder="Contoh: 901234567890"
+                maxlength="12"
+                pattern="[0-9]{12}"
                 required
                 autofocus
               >
             </div>
-            @error('email')
+            @error('nokp')
               <span class="invalid-feedback">
                 <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
               </span>
@@ -400,10 +443,13 @@
                 type="password"
                 id="password"
                 name="password"
-                class="form-input @error('password') is-invalid @enderror"
+                class="form-input password-field @error('password') is-invalid @enderror"
                 placeholder="Masukkan kata laluan"
                 required
               >
+              <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+                <i class="fa-solid fa-eye"></i>
+              </button>
             </div>
             @error('password')
               <span class="invalid-feedback">
@@ -427,10 +473,29 @@
         </form>
 
         <div class="login-footer">
+          Belum mempunyai akaun? <a href="{{ route('register') }}">Daftar Sekarang</a>
+          <br><br>
           &copy; {{ date('Y') }} KKDW. Hak Cipta Terpelihara.
         </div>
       </div>
     </div>
   </div>
+
+  <script>
+    function togglePassword(inputId, button) {
+      const input = document.getElementById(inputId);
+      const icon = button.querySelector('i');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+  </script>
 </body>
 </html>

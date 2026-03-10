@@ -16,8 +16,118 @@
   {{-- Font Awesome --}}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+  {{-- Tom Select for searchable dropdowns --}}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css">
+
   {{-- Your custom overrides --}}
   <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+
+  <style>
+    /* Tom Select custom styling */
+    .ts-wrapper {
+      font-family: inherit;
+      margin: 0 !important;
+    }
+    .ts-wrapper.single .ts-control {
+      background: var(--input-bg, #f9fafb) !important;
+      border: 1px solid var(--border, #e5e7eb);
+      border-radius: var(--radius, 16px);
+      padding: 0 14px !important;
+      font-size: 14px;
+      min-height: 46px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s;
+      color: var(--ink, #374151);
+      box-sizing: border-box;
+    }
+    .ts-wrapper.single .ts-control > * {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .ts-wrapper .ts-control .item {
+      color: var(--ink, #374151);
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .ts-wrapper .ts-control input {
+      color: var(--ink, #374151);
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .ts-wrapper.focus .ts-control {
+      border-color: var(--accent, #667eea);
+      background: var(--input-bg, #f9fafb) !important;
+      box-shadow: 0 0 0 3px rgba(59, 87, 244, 0.1);
+    }
+    .ts-wrapper .ts-control input {
+      font-size: 14px;
+    }
+    .ts-dropdown {
+      background: var(--panel, white);
+      border: 1px solid var(--border, #e5e7eb);
+      border-radius: var(--radius, 16px);
+      box-shadow: var(--shadow, 0 4px 6px -1px rgba(0,0,0,0.1));
+      margin-top: 4px;
+    }
+    .ts-dropdown .option {
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--ink, #374151);
+    }
+    .ts-dropdown .option.active {
+      background: var(--accent, #667eea);
+      color: white;
+    }
+    .ts-dropdown .option:hover {
+      background: var(--hover, #f3f4f6);
+      color: var(--ink, #374151);
+    }
+    .ts-dropdown .option.active:hover {
+      background: var(--accent, #667eea);
+      color: white;
+    }
+    .ts-wrapper.is-invalid .ts-control {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+    
+    /* Dark mode overrides for Tom Select */
+    body.theme-dark .ts-wrapper .ts-control {
+      background: var(--input-bg) !important;
+      border-color: var(--border);
+      color: var(--ink);
+    }
+    body.theme-dark .ts-wrapper .ts-control .item {
+      color: var(--ink) !important;
+    }
+    body.theme-dark .ts-wrapper .ts-control > input {
+      color: var(--ink) !important;
+    }
+    body.theme-dark .ts-wrapper .ts-control > input::placeholder {
+      color: var(--muted) !important;
+    }
+    body.theme-dark .ts-wrapper.focus .ts-control {
+      background: var(--input-bg) !important;
+      border-color: var(--accent);
+    }
+    body.theme-dark .ts-dropdown {
+      background: var(--panel) !important;
+      border-color: var(--border);
+    }
+    body.theme-dark .ts-dropdown .option {
+      color: var(--ink) !important;
+    }
+    body.theme-dark .ts-dropdown .option:hover {
+      background: var(--hover) !important;
+      color: var(--ink) !important;
+    }
+    body.theme-dark .ts-dropdown .option.active {
+      background: var(--accent) !important;
+      color: white !important;
+    }
+  </style>
 
   @stack('styles')
 </head>
@@ -62,9 +172,19 @@
       </div>
 
       @if (strtolower(auth()->user()->role) === 'admin')
+      @php
+        $pendingCount = \App\Models\User::where('status', 'baru')->whereNull('email_verified_at')->count();
+      @endphp
       <div class="menu-block">
         <div class="menu-label">PENGURUSAN</div>
-        <a href="{{ route('admin.pengguna.index') }}" class="menu-item" data-tooltip="Senarai Pengguna">
+        <a href="{{ route('admin.pendaftaran.index') }}" class="menu-item {{ $isActive('admin.pendaftaran.*') ? 'active' : '' }}" data-tooltip="Senarai Permohonan">
+          <span class="menu-icon"><i class="fa-solid fa-user-clock"></i></span>
+          <span class="menu-text">Senarai Permohonan</span>
+          @if ($pendingCount > 0)
+            <span class="menu-badge">{{ $pendingCount }}</span>
+          @endif
+        </a>
+        <a href="{{ route('admin.pengguna.index') }}" class="menu-item {{ $isActive('admin.pengguna.*') ? 'active' : '' }}" data-tooltip="Senarai Pengguna">
           <span class="menu-icon"><i class="fa-solid fa-users"></i></span>
           <span class="menu-text">Senarai Pengguna</span>
         </a>
@@ -134,6 +254,26 @@
 </div>
 
 <script src="{{ asset('js/layout.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Tom Select on bahagian_id dropdown if exists
+    const bahagianSelect = document.getElementById('bahagian_id');
+    if (bahagianSelect && !bahagianSelect.tomselect) {
+      new TomSelect('#bahagian_id', {
+        placeholder: '-- Pilih Bahagian --',
+        allowEmptyOption: true,
+        create: false,
+        sortField: { field: 'text', direction: 'asc' }
+      });
+
+      // Transfer invalid class to Tom Select wrapper
+      if (bahagianSelect.classList.contains('is-invalid')) {
+        bahagianSelect.closest('.ts-wrapper')?.classList.add('is-invalid');
+      }
+    }
+  });
+</script>
 @stack('scripts')
 
 </body>

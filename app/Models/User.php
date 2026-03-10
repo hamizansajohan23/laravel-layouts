@@ -26,6 +26,7 @@ class User extends Authenticatable
         'role',
         'status',
         'bahagian_id',
+        'email_verified_at',
     ];
 
     /**
@@ -69,9 +70,17 @@ class User extends Authenticatable
 
     /**
      * Get the status label.
+     * - baru + email_verified_at = null → Menunggu (pending approval)
+     * - baru + email_verified_at set → Baru (new staff, approved)
+     * - aktif → Aktif
+     * - tidak_aktif → Tidak Aktif
      */
     public function getStatusLabelAttribute(): string
     {
+        if ($this->status === 'baru') {
+            return $this->email_verified_at === null ? 'Menunggu' : 'Baru';
+        }
+
         return match ($this->status) {
             'aktif' => 'Aktif',
             'tidak_aktif' => 'Tidak Aktif',
@@ -84,10 +93,30 @@ class User extends Authenticatable
      */
     public function getStatusColorAttribute(): string
     {
+        if ($this->status === 'baru') {
+            return $this->email_verified_at === null ? 'warning' : 'info';
+        }
+
         return match ($this->status) {
             'aktif' => 'success',
             'tidak_aktif' => 'danger',
             default => 'success',
         };
+    }
+
+    /**
+     * Check if user is pending approval.
+     */
+    public function isPendingApproval(): bool
+    {
+        return $this->status === 'baru' && $this->email_verified_at === null;
+    }
+
+    /**
+     * Check if user is approved (can login).
+     */
+    public function isApproved(): bool
+    {
+        return $this->email_verified_at !== null || $this->status === 'aktif';
     }
 }

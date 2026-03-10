@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bahagian;
 use App\Models\User;
+use App\Notifications\RegistrationApprovedNotification;
+use App\Notifications\UserCreatedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,9 +20,19 @@ class PenggunaController extends Controller
      */
     public function index(): View
     {
-        $users = User::with('bahagian')->latest()->paginate(10);
+        // Show all approved users (aktif, tidak_aktif, or baru with email_verified_at set)
+        // Exclude pending approval users (baru with email_verified_at = null)
+        $users = User::with('bahagian')
+            ->where(function ($query) {
+                $query->where('status', '!=', 'baru')
+                    ->orWhereNotNull('email_verified_at');
+            })
+            ->latest()
+            ->paginate(10);
 
-        return view('pages.admin.pengguna.index', compact('users'));
+        $bahagians = Bahagian::orderBy('nama_pendek')->get();
+
+        return view('pages.admin.pengguna.index', compact('users', 'bahagians'));
     }
 
     /**
@@ -44,7 +56,7 @@ class PenggunaController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'bahagian_id' => ['required', 'exists:bahagians,id'],
             'role' => ['required', 'in:admin,pengguna'],
-            'status' => ['required', 'in:aktif,tidak_aktif'],
+            'status' => ['required', 'in:baru,aktif,tidak_aktif'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
             'name.required' => 'Nama penuh diperlukan.',
@@ -60,19 +72,25 @@ class PenggunaController extends Controller
             'password.confirmed' => 'Pengesahan kata laluan tidak sepadan.',
         ]);
 
-        User::create([
+        // Store password before hashing for email
+        $plainPassword = $validated['password'];
+
+        $user = User::create([
             'name' => $validated['name'],
             'nokp' => $validated['nokp'],
             'email' => $validated['email'],
             'bahagian_id' => $validated['bahagian_id'],
             'role' => $validated['role'],
             'status' => $validated['status'],
-            'password' => Hash::make($validated['password']),
+            'password' => Hash::make($plainPassword),
         ]);
+
+        // Send email notification with credentials
+        $user->notify(new UserCreatedNotification($plainPassword));
 
         return redirect()
             ->route('admin.pengguna.index')
-            ->with('success', 'Pengguna baru berjaya dicipta.');
+            ->with('success', 'Pengguna baru berjaya dicipta. Emel dengan maklumat log masuk telah dihantar.');
     }
 
     /**
@@ -96,7 +114,7 @@ class PenggunaController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($pengguna->id)],
             'bahagian_id' => ['required', 'exists:bahagians,id'],
             'role' => ['required', 'in:admin,pengguna'],
-            'status' => ['required', 'in:aktif,tidak_aktif'],
+            'status' => ['required', 'in:baru,aktif,tidak_aktif'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ], [
             'name.required' => 'Nama penuh diperlukan.',
@@ -149,5 +167,44 @@ class PenggunaController extends Controller
         return redirect()
             ->route('admin.pengguna.index')
             ->with('success', 'Pengguna berjaya dipadam.');
+    }
+
+    /**
+     * Luluskan pendaftaran pengguna.
+     */
+    public function approve(User $pengguna): RedirectResponse
+    {
+        if ($pengguna->status !== 'baru') {
+            return redirect()
+                ->route('admin.pengguna.index')
+                ->with('error', 'Hanya pengguna dengan status "Baru" boleh diluluskan.');
+        }
+
+        $pengguna->update(['status' => 'aktif']);
+
+        // Send approval notification
+        $pengguna->notify(new RegistrationApprovedNotification);
+
+        return redirect()
+            ->route('admin.pengguna.index')
+            ->with('success', 'Pendaftaran pengguna berjaya diluluskan. Emel pemberitahuan telah dihantar.');
+    }
+
+    /**
+     * Tolak pendaftaran pengguna.
+     */
+    public function reject(User $pengguna): RedirectResponse
+    {
+        if ($pengguna->status !== 'baru') {
+            return redirect()
+                ->route('admin.pengguna.index')
+                ->with('error', 'Hanya pengguna dengan status "Baru" boleh ditolak.');
+        }
+
+        $pengguna->delete();
+
+        return redirect()
+            ->route('admin.pengguna.index')
+            ->with('success', 'Pendaftaran pengguna telah ditolak dan dipadam.');
     }
 }
