@@ -412,7 +412,7 @@
           @csrf
 
           <div class="form-group">
-            <label for="nokp" class="form-label">No. Kad Pengenalan</label>
+            <label for="nokp" class="form-label">ID Pengguna</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-id-card"></i>
               <input
