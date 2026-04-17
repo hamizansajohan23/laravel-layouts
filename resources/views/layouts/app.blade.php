@@ -155,11 +155,15 @@
     </div>
 
     <div class="profile-card">
-      <div class="avatar"><img src="{{ asset('img/user.jpg') }}" alt="User Avatar" class="avatar-image"></div>
-      <div class="profile-meta">
-        <div class="profile-name">{{ $userName }}</div>
-        <div class="profile-role">{{ $userBahagian }}</div>
+      <div class="avatar">
+        @if ($user->profile_picture)
+          <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="{{ $userName }}" class="avatar-image">
+        @else
+          <span class="avatar-initials">{{ $userInitials }}</span>
+        @endif
       </div>
+      <div class="profile-name">{{ $userName }}</div>
+      <div class="profile-role">{{ $userBahagian }}</div>
     </div>
 
     <nav class="menu">
@@ -171,12 +175,13 @@
         </a>
       </div>
 
-      @if (strtolower(auth()->user()->role) === 'admin')
+      @if (auth()->user()->hasAnyPermission(['permohonan.view', 'pengguna.view', 'peranan.view']))
       @php
         $pendingCount = \App\Models\User::where('status', 'baru')->whereNull('email_verified_at')->count();
       @endphp
       <div class="menu-block">
         <div class="menu-label">PENGURUSAN</div>
+        @if (auth()->user()->hasPermission('permohonan.view'))
         <a href="{{ route('admin.pendaftaran.index') }}" class="menu-item {{ $isActive('admin.pendaftaran.*') ? 'active' : '' }}" data-tooltip="Senarai Permohonan">
           <span class="menu-icon"><i class="fa-solid fa-user-clock"></i></span>
           <span class="menu-text">Senarai Permohonan</span>
@@ -184,10 +189,19 @@
             <span class="menu-badge">{{ $pendingCount }}</span>
           @endif
         </a>
+        @endif
+        @if (auth()->user()->hasPermission('pengguna.view'))
         <a href="{{ route('admin.pengguna.index') }}" class="menu-item {{ $isActive('admin.pengguna.*') ? 'active' : '' }}" data-tooltip="Senarai Pengguna">
           <span class="menu-icon"><i class="fa-solid fa-users"></i></span>
           <span class="menu-text">Senarai Pengguna</span>
         </a>
+        @endif
+        @if (auth()->user()->hasPermission('peranan.view'))
+        <a href="{{ route('admin.peranan.index') }}" class="menu-item {{ $isActive('admin.peranan.*') ? 'active' : '' }}" data-tooltip="Senarai Peranan">
+          <span class="menu-icon"><i class="fa-solid fa-user-shield"></i></span>
+          <span class="menu-text">Senarai Peranan</span>
+        </a>
+        @endif
       </div>
       @endif
     </nav>
@@ -205,12 +219,99 @@
         </div> --}}
       </div>
       <div class="topbar-right">
+        {{-- Notification Bell --}}
+        <div class="notification-dropdown">
+          <button type="button" class="icon-btn notification-btn" aria-haspopup="true" aria-expanded="false" aria-controls="notificationMenu" aria-label="Notifications">
+            <i class="fa-regular fa-bell"></i>
+            @if (auth()->user()->hasPermission('permohonan.view'))
+              @php
+                $newRegistrations = \App\Models\User::where('status', 'baru')->whereNull('email_verified_at')->count();
+              @endphp
+              @if ($newRegistrations > 0)
+                <span class="notification-badge">{{ $newRegistrations > 9 ? '9+' : $newRegistrations }}</span>
+              @endif
+            @endif
+          </button>
+          <div id="notificationMenu" class="notification-menu" role="menu">
+            <div class="notification-header">
+              <span class="notification-title">Notifikasi</span>
+              @if (auth()->user()->hasPermission('permohonan.view') && isset($newRegistrations) && $newRegistrations > 0)
+                <span class="notification-count">{{ $newRegistrations }} baharu</span>
+              @endif
+            </div>
+            <div class="notification-list">
+              @if (auth()->user()->hasPermission('permohonan.view'))
+                @php
+                  $recentRegistrations = \App\Models\User::where('status', 'baru')
+                    ->whereNull('email_verified_at')
+                    ->orderBy('created_at', 'desc')
+                    ->take(5)
+                    ->get();
+                @endphp
+                @forelse ($recentRegistrations as $registration)
+                  <a href="{{ route('admin.pendaftaran.index') }}" class="notification-item unread">
+                    <div class="notification-icon">
+                      <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>{{ $registration->name }}</strong> telah memohon pendaftaran
+                      </div>
+                      <div class="notification-time">{{ $registration->created_at->diffForHumans() }}</div>
+                    </div>
+                  </a>
+                @empty
+                  <div class="notification-empty">
+                    <i class="fa-regular fa-bell-slash"></i>
+                    <span>Tiada permohonan pendaftaran baharu</span>
+                  </div>
+                @endforelse
+              @else
+                {{-- User notifications --}}
+                <div class="notification-item">
+                  <div class="notification-icon welcome">
+                    <i class="fa-solid fa-hand-wave"></i>
+                  </div>
+                  <div class="notification-content">
+                    <div class="notification-text">
+                      <strong>Selamat datang, {{ $userName }}!</strong> ke Sistem Permohonan Pengguna
+                    </div>
+                    <div class="notification-time">Sistem</div>
+                  </div>
+                </div>
+                <div class="notification-item">
+                  <div class="notification-icon info">
+                    <i class="fa-solid fa-circle-info"></i>
+                  </div>
+                  <div class="notification-content">
+                    <div class="notification-text">
+                      Sila lengkapkan profil anda untuk pengalaman yang lebih baik
+                    </div>
+                    <div class="notification-time">Petua</div>
+                  </div>
+                </div>
+              @endif
+            </div>
+            @if (auth()->user()->hasPermission('permohonan.view') && isset($recentRegistrations) && $recentRegistrations->count() > 0)
+              <a href="{{ route('admin.pendaftaran.index') }}" class="notification-footer">
+                Lihat semua permohonan <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            @endif
+          </div>
+        </div>
+
         <button type="button" id="themeBtn" class="icon-btn" aria-label="Toggle theme" aria-pressed="false">
           <i class="fa-regular fa-moon"></i>
         </button>
         <div class="profile-dropdown">
           <button type="button" class="profile-pill" aria-haspopup="true" aria-expanded="false" aria-controls="profileMenu">
-            <div class="avatar"><img src="{{ asset('img/user.jpg') }}" alt="User Avatar" class="avatar-image"></div>
+            <div class="avatar">
+              @if ($user->profile_picture)
+                <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="{{ $userName }}" class="avatar-image">
+              @else
+                <span class="avatar-initials">{{ $userInitials }}</span>
+              @endif
+            </div>
             <div>
               <div class="profile-name">{{ $userName }}</div>
               <div class="profile-role">{{ $userRole }}</div>

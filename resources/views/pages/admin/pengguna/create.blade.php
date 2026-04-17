@@ -375,19 +375,21 @@
           </div>
 
           <div class="form-group">
-            <label for="role" class="form-label">
+            <label for="role_id" class="form-label">
               Peranan <span class="required">*</span>
             </label>
             <select
-              id="role"
-              name="role"
-              class="form-select @error('role') is-invalid @enderror"
+              id="role_id"
+              name="role_id"
+              class="form-select @error('role_id') is-invalid @enderror"
               required
             >
-              <option value="pengguna" {{ old('role', 'pengguna') === 'pengguna' ? 'selected' : '' }}>Pengguna</option>
-              <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Pentadbir</option>
+              <option value="" disabled {{ old('role_id') ? '' : 'selected' }}>-- Pilih Peranan --</option>
+              @foreach ($roles as $role)
+                <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>{{ $role->display_name }}</option>
+              @endforeach
             </select>
-            @error('role')
+            @error('role_id')
               <span class="invalid-feedback">
                 <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
               </span>

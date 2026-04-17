@@ -418,6 +418,19 @@
     font-size: 10px;
   }
 
+  .role-badge:not(.admin):not(.pengguna) {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+
+  .role-badge:not(.admin):not(.pengguna)::before {
+    content: '\f521';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 10px;
+  }
+
   .status-badge {
     display: inline-flex;
     align-items: center;
@@ -708,8 +721,7 @@
 
   <div class="page-header">
     <div class="page-header-info">
-      <h2>Pengurusan Pengguna</h2>
-      <p>Urus semua pengguna dalam sistem</p>
+     
     </div>
     <a href="{{ route('admin.pengguna.create') }}" class="btn btn-primary">
       <i class="fa-solid fa-user-plus"></i>
@@ -840,7 +852,7 @@
                 </td>
                 <td>
                   <span class="role-badge {{ strtolower($user->role) }}">
-                    {{ ucfirst($user->role) }}
+                    {{ $user->roleModel ? $user->roleModel->display_name : ucfirst($user->role) }}
                   </span>
                 </td>
                 <td>
@@ -857,10 +869,12 @@
                 </td>
                 <td style="text-align: center;">
                   <div class="action-buttons">
-                    <a href="{{ route('admin.pengguna.edit', $user) }}" class="btn-action edit" title="Kemaskini">
-                      <i class="fa-solid fa-pen-to-square"></i>
-                    </a>
-                    @if ($user->id !== auth()->id())
+                    @if (auth()->user()->canManageUser($user) || auth()->id() === $user->id)
+                      <a href="{{ route('admin.pengguna.edit', $user) }}" class="btn-action edit" title="Kemaskini">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </a>
+                    @endif
+                    @if ($user->id !== auth()->id() && auth()->user()->canManageUser($user))
                       <form action="{{ route('admin.pengguna.destroy', $user) }}" method="POST" style="display: inline;" onsubmit="return confirm('Adakah anda pasti mahu memadam pengguna {{ $user->name }}?');">
                         @csrf
                         @method('DELETE')

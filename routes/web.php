@@ -53,5 +53,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/pengguna/{pengguna}/edit', [App\Http\Controllers\Admin\PenggunaController::class, 'edit'])->name('pengguna.edit');
         Route::put('/pengguna/{pengguna}', [App\Http\Controllers\Admin\PenggunaController::class, 'update'])->name('pengguna.update');
         Route::delete('/pengguna/{pengguna}', [App\Http\Controllers\Admin\PenggunaController::class, 'destroy'])->name('pengguna.destroy');
+
+        // Senarai Peranan (untuk admin)
+        Route::resource('peranan', App\Http\Controllers\Admin\RoleController::class)->except(['show']);
     });
 });

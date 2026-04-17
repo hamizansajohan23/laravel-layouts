@@ -557,7 +557,7 @@
                 class="form-select @error('bahagian_id') is-invalid @enderror"
                 required
               >
-                <option value="">-- Pilih Bahagian --</option>
+                <option value="" disabled selected>-- Pilih Bahagian --</option>
                 @foreach ($bahagians as $bahagian)
                   <option value="{{ $bahagian->id }}" {{ old('bahagian_id') == $bahagian->id ? 'selected' : '' }}>
                     {{ $bahagian->nama_bahagian }}

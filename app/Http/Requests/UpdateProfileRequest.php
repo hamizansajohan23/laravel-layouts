@@ -27,6 +27,7 @@ class UpdateProfileRequest extends FormRequest
             'nokp' => ['nullable', 'string', 'size:12', 'regex:/^[0-9]+$/'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
             'bahagian_id' => ['nullable', 'exists:bahagians,id'],
+            'profile_picture' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];
     }
 
@@ -46,6 +47,9 @@ class UpdateProfileRequest extends FormRequest
             'email.email' => 'Format emel tidak sah.',
             'email.unique' => 'Emel ini telah digunakan.',
             'bahagian_id.exists' => 'Bahagian yang dipilih tidak sah.',
+            'profile_picture.image' => 'Fail mestilah gambar.',
+            'profile_picture.mimes' => 'Format gambar mestilah JPEG, PNG, JPG, GIF atau WEBP.',
+            'profile_picture.max' => 'Saiz gambar tidak boleh melebihi 2MB.',
         ];
     }
 }

@@ -473,13 +473,6 @@
     </div>
   @endif
 
-  <div class="page-header">
-    <div class="page-header-info">
-      <h2>Senarai Permohonan</h2>
-      <p>Urus permohonan pendaftaran pengguna baru yang memerlukan kelulusan</p>
-    </div>
-  </div>
-
   <div class="stats-grid">
     <div class="stat-card warning">
       <div class="stat-icon warning">

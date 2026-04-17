@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bahagian;
+use App\Models\Role;
 use App\Models\User;
 use App\Notifications\RegistrationApprovedNotification;
 use App\Notifications\UserCreatedNotification;
@@ -41,8 +42,9 @@ class PenggunaController extends Controller
     public function create(): View
     {
         $bahagians = Bahagian::orderBy('nama_pendek')->get();
+        $roles = Role::orderBy('display_name')->get();
 
-        return view('pages.admin.pengguna.create', compact('bahagians'));
+        return view('pages.admin.pengguna.create', compact('bahagians', 'roles'));
     }
 
     /**
@@ -55,7 +57,7 @@ class PenggunaController extends Controller
             'nokp' => ['nullable', 'string', 'max:20'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'bahagian_id' => ['required', 'exists:bahagians,id'],
-            'role' => ['required', 'in:admin,pengguna'],
+            'role_id' => ['required', 'exists:roles,id'],
             'status' => ['required', 'in:baru,aktif,tidak_aktif'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
@@ -65,7 +67,8 @@ class PenggunaController extends Controller
             'email.unique' => 'Emel ini telah digunakan.',
             'bahagian_id.required' => 'Sila pilih bahagian.',
             'bahagian_id.exists' => 'Bahagian tidak sah.',
-            'role.required' => 'Sila pilih peranan.',
+            'role_id.required' => 'Sila pilih peranan.',
+            'role_id.exists' => 'Peranan tidak sah.',
             'status.required' => 'Sila pilih status.',
             'password.required' => 'Kata laluan diperlukan.',
             'password.min' => 'Kata laluan mestilah sekurang-kurangnya 8 aksara.',
@@ -75,12 +78,15 @@ class PenggunaController extends Controller
         // Store password before hashing for email
         $plainPassword = $validated['password'];
 
+        $role = Role::find($validated['role_id']);
+
         $user = User::create([
             'name' => $validated['name'],
             'nokp' => $validated['nokp'],
             'email' => $validated['email'],
             'bahagian_id' => $validated['bahagian_id'],
-            'role' => $validated['role'],
+            'role_id' => $validated['role_id'],
+            'role' => $role->name,
             'status' => $validated['status'],
             'password' => Hash::make($plainPassword),
         ]);
@@ -98,9 +104,15 @@ class PenggunaController extends Controller
      */
     public function edit(User $pengguna): View
     {
-        $bahagians = Bahagian::orderBy('nama_pendek')->get();
+        // Check if current user can manage this user
+        if (! auth()->user()->canManageUser($pengguna) && auth()->id() !== $pengguna->id) {
+            abort(403, 'Anda tidak mempunyai kebenaran untuk mengedit pengguna ini.');
+        }
 
-        return view('pages.admin.pengguna.edit', compact('pengguna', 'bahagians'));
+        $bahagians = Bahagian::orderBy('nama_pendek')->get();
+        $roles = Role::orderBy('display_name')->get();
+
+        return view('pages.admin.pengguna.edit', compact('pengguna', 'bahagians', 'roles'));
     }
 
     /**
@@ -108,12 +120,17 @@ class PenggunaController extends Controller
      */
     public function update(Request $request, User $pengguna): RedirectResponse
     {
+        // Check if current user can manage this user
+        if (! auth()->user()->canManageUser($pengguna) && auth()->id() !== $pengguna->id) {
+            abort(403, 'Anda tidak mempunyai kebenaran untuk mengedit pengguna ini.');
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'nokp' => ['nullable', 'string', 'max:20'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($pengguna->id)],
             'bahagian_id' => ['required', 'exists:bahagians,id'],
-            'role' => ['required', 'in:admin,pengguna'],
+            'role_id' => ['required', 'exists:roles,id'],
             'status' => ['required', 'in:baru,aktif,tidak_aktif'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ], [
@@ -123,18 +140,22 @@ class PenggunaController extends Controller
             'email.unique' => 'Emel ini telah digunakan.',
             'bahagian_id.required' => 'Sila pilih bahagian.',
             'bahagian_id.exists' => 'Bahagian tidak sah.',
-            'role.required' => 'Sila pilih peranan.',
+            'role_id.required' => 'Sila pilih peranan.',
+            'role_id.exists' => 'Peranan tidak sah.',
             'status.required' => 'Sila pilih status.',
             'password.min' => 'Kata laluan mestilah sekurang-kurangnya 8 aksara.',
             'password.confirmed' => 'Pengesahan kata laluan tidak sepadan.',
         ]);
+
+        $role = Role::find($validated['role_id']);
 
         $updateData = [
             'name' => $validated['name'],
             'nokp' => $validated['nokp'],
             'email' => $validated['email'],
             'bahagian_id' => $validated['bahagian_id'],
-            'role' => $validated['role'],
+            'role_id' => $validated['role_id'],
+            'role' => $role->name,
             'status' => $validated['status'],
         ];
 
@@ -160,6 +181,11 @@ class PenggunaController extends Controller
             return redirect()
                 ->route('admin.pengguna.index')
                 ->with('error', 'Anda tidak boleh memadam akaun anda sendiri.');
+        }
+
+        // Check if current user can manage this user
+        if (! auth()->user()->canManageUser($pengguna)) {
+            abort(403, 'Anda tidak mempunyai kebenaran untuk memadam pengguna ini.');
         }
 
         $pengguna->delete();

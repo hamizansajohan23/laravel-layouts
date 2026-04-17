@@ -229,11 +229,11 @@
     .form-grid {
       grid-template-columns: 1fr;
     }
-    
+
     .form-actions {
       flex-direction: column;
     }
-    
+
     .btn {
       justify-content: center;
     }
@@ -427,7 +427,7 @@
               class="form-select @error('bahagian_id') is-invalid @enderror"
               required
             >
-              <option value="">-- Pilih Bahagian --</option>
+              <option value="" disabled selected>-- Pilih Bahagian --</option>
               @foreach ($bahagians as $bahagian)
                 <option value="{{ $bahagian->id }}" {{ old('bahagian_id', $pengguna->bahagian_id) == $bahagian->id ? 'selected' : '' }}>
                   {{ $bahagian->nama_pendek }} - {{ $bahagian->nama_bahagian }}
@@ -442,19 +442,21 @@
           </div>
 
           <div class="form-group">
-            <label for="role" class="form-label">
+            <label for="role_id" class="form-label">
               Peranan <span class="required">*</span>
             </label>
             <select
-              id="role"
-              name="role"
-              class="form-select @error('role') is-invalid @enderror"
+              id="role_id"
+              name="role_id"
+              class="form-select @error('role_id') is-invalid @enderror"
               required
             >
-              <option value="pengguna" {{ old('role', $pengguna->role) === 'pengguna' ? 'selected' : '' }}>Pengguna</option>
-              <option value="admin" {{ old('role', $pengguna->role) === 'admin' ? 'selected' : '' }}>Pentadbir</option>
+              <option value="" disabled>-- Pilih Peranan --</option>
+              @foreach ($roles as $role)
+                <option value="{{ $role->id }}" {{ old('role_id', $pengguna->role_id) == $role->id ? 'selected' : '' }}>{{ $role->display_name }}</option>
+              @endforeach
             </select>
-            @error('role')
+            @error('role_id')
               <span class="invalid-feedback">
                 <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
               </span>

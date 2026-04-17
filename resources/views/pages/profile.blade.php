@@ -6,44 +6,43 @@
 
 @push('styles')
 <style>
-  .profile-page {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
+  .profile-container {
+    width: 100%;
   }
 
-  @media (max-width: 992px) {
-    .profile-page {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .profile-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .profile-avatar-card {
+  .profile-avatar-section {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 32px 24px;
+    padding: 32px 24px 24px;
     text-align: center;
     box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+
+  .profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 16px;
   }
 
   .profile-avatar-large {
-    width: 120px;
-    height: 120px;
+    width: 130px;
+    height: 130px;
     border-radius: 50%;
-    margin: 0 auto 20px;
     background: linear-gradient(135deg, rgba(59,87,244,.15), rgba(39,194,164,.15));
-    border: 3px solid var(--border);
+    border: 4px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .profile-avatar-large:hover {
+    border-color: var(--accent);
+    transform: scale(1.02);
   }
 
   .profile-avatar-large img {
@@ -53,22 +52,60 @@
   }
 
   .profile-avatar-large .initials {
-    font-size: 42px;
+    font-size: 44px;
     font-weight: 700;
     color: var(--accent);
   }
 
+  .avatar-upload-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    border-radius: 0 0 50% 50%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+  }
+
+  .profile-avatar-wrapper:hover .avatar-upload-overlay {
+    opacity: 1;
+  }
+
+  .avatar-upload-overlay i {
+    color: white;
+    font-size: 18px;
+  }
+
+  .avatar-upload-input {
+    display: none;
+  }
+
   .profile-display-name {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: var(--ink);
     margin-bottom: 4px;
   }
 
   .profile-display-role {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--muted);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+  }
+
+  .profile-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
   }
 
   .profile-badge {
@@ -79,63 +116,28 @@
     background: linear-gradient(135deg, rgba(59,87,244,.12), rgba(39,194,164,.12));
     border: 1px solid var(--border);
     border-radius: 999px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--accent);
   }
 
-  .profile-stats {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-  }
-
-  .profile-stats-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 16px;
-  }
-
-  .profile-stats-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .profile-stats-item {
-    display: flex;
+  .profile-date {
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    background: var(--panel-2);
-    border-radius: 10px;
-  }
-
-  .profile-stats-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, rgba(59,87,244,.12), rgba(39,194,164,.12));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-  }
-
-  .profile-stats-label {
+    gap: 6px;
     font-size: 12px;
     color: var(--muted);
   }
 
-  .profile-stats-value {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
+  .profile-date i {
+    color: var(--accent);
+  }
+
+  .avatar-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 14px;
+    opacity: 0.8;
   }
 
   .profile-form-card {
@@ -147,7 +149,7 @@
   }
 
   .profile-form-header {
-    padding: 20px 24px;
+    padding: 18px 24px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -155,27 +157,27 @@
   }
 
   .profile-form-header i {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 10px;
     background: linear-gradient(135deg, rgba(59,87,244,.12), rgba(39,194,164,.12));
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--accent);
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .profile-form-header h5 {
     margin: 0;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--ink);
   }
 
   .profile-form-header p {
     margin: 2px 0 0;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--muted);
   }
 
@@ -186,7 +188,7 @@
   .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 18px;
   }
 
   @media (max-width: 768px) {
@@ -217,7 +219,7 @@
 
   .form-group .form-control {
     width: 100%;
-    padding: 12px 16px;
+    padding: 11px 14px;
     font-size: 14px;
     font-family: inherit;
     border: 1px solid var(--border);
@@ -225,6 +227,21 @@
     background: var(--panel-2);
     color: var(--ink);
     transition: all 0.2s ease;
+    height: 44px;
+    box-sizing: border-box;
+    line-height: 1.4;
+  }
+
+  .form-group select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding: 0 36px 0 14px;
+    cursor: pointer;
+    line-height: 42px;
   }
 
   .form-group .form-control:focus {
@@ -234,7 +251,9 @@
   }
 
   .form-group .form-control:disabled {
-    opacity: 0.6;
+    background: var(--panel-2);
+    color: var(--ink);
+    opacity: 1;
     cursor: not-allowed;
   }
 
@@ -243,19 +262,19 @@
   }
 
   .form-group .form-hint {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted);
-    margin-top: 6px;
+    margin-top: 5px;
   }
 
   .form-group .invalid-feedback {
     font-size: 12px;
     color: #ef4444;
-    margin-top: 6px;
+    margin-top: 5px;
   }
 
   .profile-form-footer {
-    padding: 20px 24px;
+    padding: 18px 24px;
     border-top: 1px solid var(--border);
     background: var(--panel-2);
     display: flex;
@@ -267,8 +286,8 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 20px;
-    font-size: 14px;
+    padding: 11px 18px;
+    font-size: 13px;
     font-weight: 600;
     font-family: inherit;
     border-radius: 10px;
@@ -362,53 +381,35 @@
     </div>
   @endif
 
-  <div class="profile-page">
-    {{-- Sidebar --}}
-    <div class="profile-sidebar">
-      <div class="profile-avatar-card">
+  <div class="profile-container">
+    {{-- Profile Avatar Section - Centered Above --}}
+    <div class="profile-avatar-section">
+      <div class="profile-avatar-wrapper" onclick="document.getElementById('profile_picture').click()">
         <div class="profile-avatar-large">
-          <img src="{{ asset('img/user.jpg') }}" alt="{{ $user->name }}">
+          @if ($user->profile_picture)
+            <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="{{ $user->name }}" id="avatar-preview">
+          @else
+            <span class="initials" id="avatar-initials">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
+            <img src="" alt="{{ $user->name }}" id="avatar-preview" style="display: none;">
+          @endif
         </div>
-        <div class="profile-display-name">{{ $user->name }}</div>
-        <div class="profile-display-role">{{ $user->bahagian->nama_pendek ?? 'Tiada Bahagian' }}</div>
+        <div class="avatar-upload-overlay">
+          <i class="fa-solid fa-camera"></i>
+        </div>
+      </div>
+      <div class="profile-display-name">{{ $user->name }}</div>
+      <div class="profile-display-role">{{ $user->bahagian->nama_pendek ?? 'Tiada Bahagian' }}</div>
+      <div class="profile-meta">
         <div class="profile-badge">
           <i class="fa-solid fa-shield-halved"></i>
           {{ ucfirst($user->role) }}
         </div>
-      </div>
-
-      <div class="profile-stats">
-        <div class="profile-stats-title">Maklumat Akaun</div>
-        <div class="profile-stats-list">
-          <div class="profile-stats-item">
-            <div class="profile-stats-icon">
-              <i class="fa-solid fa-envelope"></i>
-            </div>
-            <div>
-              <div class="profile-stats-label">Emel</div>
-              <div class="profile-stats-value">{{ $user->email }}</div>
-            </div>
-          </div>
-          <div class="profile-stats-item">
-            <div class="profile-stats-icon">
-              <i class="fa-solid fa-id-card"></i>
-            </div>
-            <div>
-              <div class="profile-stats-label">No. KP</div>
-              <div class="profile-stats-value">{{ $user->nokp ?? '-' }}</div>
-            </div>
-          </div>
-          <div class="profile-stats-item">
-            <div class="profile-stats-icon">
-              <i class="fa-solid fa-calendar"></i>
-            </div>
-            <div>
-              <div class="profile-stats-label">Daftar Sejak</div>
-              <div class="profile-stats-value">{{ $user->created_at->format('d M Y') }}</div>
-            </div>
-          </div>
+        <div class="profile-date">
+          <i class="fa-solid fa-calendar"></i>
+          Daftar sejak {{ $user->created_at->format('d M Y') }}
         </div>
       </div>
+      <div class="avatar-hint">Klik pada gambar untuk memuat naik foto baharu (JPEG, PNG, JPG, GIF, WEBP - Maks 2MB)</div>
     </div>
 
     {{-- Form --}}
@@ -421,9 +422,19 @@
         </div>
       </div>
 
-      <form action="{{ route('profile.update') }}" method="POST">
+      <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
+
+        {{-- Hidden file input for profile picture --}}
+        <input
+          type="file"
+          class="avatar-upload-input"
+          id="profile_picture"
+          name="profile_picture"
+          accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+          onchange="previewAvatar(this)"
+        >
 
         <div class="profile-form-body">
           <div class="form-grid">
@@ -453,11 +464,16 @@
                 value="{{ old('nokp', $user->nokp) }}"
                 placeholder="Contoh: 901234567890"
                 maxlength="12"
+                @if (in_array($user->role, ['user', 'pengguna'])) disabled @endif
               >
               @error('nokp')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
-              <div class="form-hint">Masukkan 12 digit tanpa sempang (-)</div>
+              @if (in_array($user->role, ['user', 'pengguna']))
+                <div class="form-hint">Maklumat ini hanya boleh dikemaskini oleh pentadbir</div>
+              @else
+                <div class="form-hint">Masukkan 12 digit tanpa sempang (-)</div>
+              @endif
             </div>
 
             <div class="form-group">
@@ -477,22 +493,14 @@
             </div>
 
             <div class="form-group">
-              <label for="bahagian_id">Bahagian</label>
-              <select
-                class="form-control @error('bahagian_id') is-invalid @enderror"
-                id="bahagian_id"
-                name="bahagian_id"
+              <label>Bahagian</label>
+              <input
+                type="text"
+                class="form-control"
+                value="{{ $user->bahagian->nama_bahagian ?? 'Tiada Bahagian' }}"
+                disabled
               >
-                <option value="">-- Pilih Bahagian --</option>
-                @foreach ($bahagians as $bahagian)
-                  <option value="{{ $bahagian->id }}" {{ old('bahagian_id', $user->bahagian_id) == $bahagian->id ? 'selected' : '' }}>
-                    {{ $bahagian->nama_bahagian }}
-                  </option>
-                @endforeach
-              </select>
-              @error('bahagian_id')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
+              <div class="form-hint">Bahagian ditetapkan oleh pentadbir sistem</div>
             </div>
 
             <div class="form-group full-width">
@@ -500,7 +508,7 @@
               <input
                 type="text"
                 class="form-control"
-                value="{{ ucfirst($user->role) }}"
+                value="{{ $user->roleModel ? $user->roleModel->display_name : ucfirst($user->role) }}"
                 disabled
               >
               <div class="form-hint">Peranan ditetapkan oleh pentadbir sistem dan tidak boleh diubah</div>
@@ -520,3 +528,27 @@
     </div>
   </div>
 @endsection
+
+@push('scripts')
+<script>
+  function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const preview = document.getElementById('avatar-preview');
+        const initials = document.getElementById('avatar-initials');
+
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+
+        if (initials) {
+          initials.style.display = 'none';
+        }
+      }
+
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+@endpush
